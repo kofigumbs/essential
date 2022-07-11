@@ -34,11 +34,11 @@ Counter = table(:counters) {
 # managed by Essential.
 
 app = page {
-  visitor_id = session.fetch(:visitor_id) { Visitor.create.id }
+  visitor_id = session[:visitor_id] ||= Visitor.create.id
   counter = Counter.find_or_create_by(visitor_id:)
 
   button(onclick: -> { counter.decrement(:value) }) { text "-1" }
-  text { counter.value }
+  text lazy { counter.value }
   button(onclick: -> { counter.increment(:value) }) { text "+1" }
 }
 

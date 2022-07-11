@@ -3,15 +3,27 @@ require "sinatra/base"
 
 module Essential
   module Page
-    class Text
+    class Lazy
       attr_accessor :block
 
       def initialize(block)
         self.block = block
       end
 
+      def to_s
+        self.block.call
+      end
+    end
+
+    class Text
+      attr_accessor :content
+
+      def initialize(content)
+        self.content = content
+      end
+
       def to_html(indent)
-        ' '*indent + "#{self.block.call}\n"
+        ' '*indent + "#{self.content.to_s}\n"
       end
     end
 
@@ -34,10 +46,14 @@ module Essential
         identifiers.empty? ? x : x.dig(*identifiers)
       end
 
-      def to_html(indent = 0)
+      def to_html(indent)
         ' '*indent + "<#{self.name}#{self.attributes.map { |(k, v)| " #{k}='#{v}'" }.join}>\n" \
           + self.children.map { |c| c.to_html(indent + 2) }.join \
           + ' '*indent + "</#{self.name}>\n"
+      end
+
+      def to_s
+        self.to_html 0
       end
     end
 
@@ -54,8 +70,12 @@ module Essential
         self.tree = Element.new(:main, [])
       end
 
-      def text(text = nil, &block)
-        self.append Text.new(block_given? ? block : -> { text })
+      def lazy(&block)
+        Lazy.new(block)
+      end
+
+      def text(content)
+        Text.new(content).tap { |el| self.children.push(el) }
       end
 
       def button(**attributes, &block)
@@ -66,16 +86,16 @@ module Essential
         attributes = attributes.map do |(k, v)|
           v.respond_to?(:call) ? ["essential-#{k}", listener_id(v)] : [k, v]
         end
-        children = self.append Element.new name, attributes
-        if block_given?
-          self.path.push(:children, children.count - 1)
-          block.call
+        Element.new(name, attributes).tap do |el|
+          self.children.push(el)
+          self.path.push(:children, self.children.count - 1)
+          block.call if block_given?
           self.path.pop 2
         end
       end
 
-      def append(child)
-        self.tree.dig(*self.path, :children).push child
+      def children
+        self.tree.dig(*self.path, :children)
       end
 
       def listener_id(listener)
@@ -91,14 +111,14 @@ module Essential
           <<~HTML
             <!DOCTYPE html>
             <body>
-              #{builder.tree.to_html}
+              #{builder.tree}
               <script src='/essential.js'></script>
             </body>
           HTML
         end
         get "/essential/event" do
           builder.listeners[params[:id]].call
-          builder.tree.to_html
+          builder.tree.to_s
         end
         get "/essential.js" do
           content_type "application/javascript"
