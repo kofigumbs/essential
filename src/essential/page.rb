@@ -86,12 +86,14 @@ module Essential
     def self.build(&block)
       builder = Builder.new
       builder.instance_exec &block
-      builder.instance_exec { node(:script, src: "/essential.js") }
       Sinatra.new do
         get "/" do
           <<~HTML
             <!DOCTYPE html>
-            <body>#{builder.tree.to_html}</body>
+            <body>
+              #{builder.tree.to_html}
+              <script src='/essential.js'></script>
+            </body>
           HTML
         end
         get "/essential/event" do
