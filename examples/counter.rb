@@ -17,10 +17,10 @@ require "./src/essential"
 # Typically one schema per project, and it would be require'd from each page.
 # Essential would run the `CREATE TABLE IF NOT EXISTS` automatically on startup.
 
-Visitor = table(:visitors) {
+Visitor = Essential.table(:visitors) {
 }
 
-Counter = table(:counters) {
+Counter = Essential.table(:counters) {
   column Visitor
   column Integer, :value, 0
 }
@@ -33,7 +33,7 @@ Counter = table(:counters) {
 # Event handler blocks get transformed into data-attributes that are
 # automatically managed by Essential.
 
-app = page {
+app = Essential.page {
   visitor_id = session[:visitor_id] ||= Visitor.create.id
   counter = Counter.find_or_create_by(visitor_id:)
 

@@ -1,10 +1,12 @@
 require "./src/essential/table"
 require "./src/essential/page"
 
-def table(name, &block)
-  Essential::Table.build(name, &block)
-end
+module Essential
+  def self.table(name, &block)
+    Essential::Table.build(name, &block)
+  end
 
-def page(&block)
-  Essential::Page.build(&block)
+  def self.page(&block)
+    Essential::Page.build(&block)
+  end
 end
