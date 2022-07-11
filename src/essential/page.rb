@@ -74,14 +74,15 @@ module Essential
         Text.new(content).tap { |el| self.children.push(el) }
       end
 
-      def button(**attributes, &block)
-        self.node :button, **attributes, &block
+      def onclick(&block)
+        ["essential-onclick", listener_id(block)]
       end
 
-      def node(name, **attributes, &block)
-        attributes = attributes.map do |(k, v)|
-          v.respond_to?(:call) ? ["essential-#{k}", listener_id(v)] : [k, v]
-        end
+      def button(*attributes, &block)
+        self.node :button, attributes, &block
+      end
+
+      def node(name, attributes, &block)
         Element.new(name, attributes).tap do |el|
           self.children.push(el)
           self.path.push(self.children.count - 1)

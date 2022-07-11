@@ -30,16 +30,16 @@ Counter = table(:counters) {
 #
 # HTML-esque DSL with interactivity primitives and access to the state.
 # Eventually, this would probably include layout helpers as well.
-# Event procs get transformed into data-attributes that are automatically
-# managed by Essential.
+# Event handler blocks get transformed into data-attributes that are
+# automatically managed by Essential.
 
 app = page {
   visitor_id = session[:visitor_id] ||= Visitor.create.id
   counter = Counter.find_or_create_by(visitor_id:)
 
-  button(onclick: -> { counter.decrement(:value) }) { text "-1" }
+  button(onclick { counter.decrement(:value) }) { text "-1" }
   text lazy { counter.value }
-  button(onclick: -> { counter.increment(:value) }) { text "+1" }
+  button(onclick { counter.increment(:value) }) { text "+1" }
 }
 
 app.run!
