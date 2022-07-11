@@ -38,12 +38,8 @@ module Essential
         self.children = []
       end
 
-      def dig(name, *identifiers)
-        x = case name
-            when :attributes then self.attributes
-            when :children then self.children
-            end
-        identifiers.empty? ? x : x.dig(*identifiers)
+      def dig(*identifiers)
+        identifiers.empty? ? self : self.children.dig(*identifiers)
       end
 
       def to_html(indent)
@@ -88,14 +84,14 @@ module Essential
         end
         Element.new(name, attributes).tap do |el|
           self.children.push(el)
-          self.path.push(:children, self.children.count - 1)
+          self.path.push(self.children.count - 1)
           block.call if block_given?
-          self.path.pop 2
+          self.path.pop
         end
       end
 
       def children
-        self.tree.dig(*self.path, :children)
+        self.tree.dig(*self.path).children
       end
 
       def listener_id(listener)
