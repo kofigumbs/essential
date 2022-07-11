@@ -33,7 +33,7 @@ Counter = Essential.table(:counters) {
 # Event handler blocks get transformed into data-attributes that are
 # automatically managed by Essential.
 
-app = Essential.page {
+App = Essential.page {
   visitor_id = session[:visitor_id] ||= Visitor.create.id
   counter = Counter.find_or_create_by(visitor_id:)
 
@@ -42,4 +42,4 @@ app = Essential.page {
   button(onclick { counter.increment(:value) }) { text "+1" }
 }
 
-app.run!
+App.run!
